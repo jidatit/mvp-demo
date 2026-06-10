@@ -1,0 +1,95 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import {
+  mockGetFundReports,
+  mockCreateFundReport,
+} from "../../../mocks/handlers/funds";
+
+// Types for API payloads and responses
+export type FundReport = {
+  id: string;
+  fundId: string;
+  createdBy: string;
+  projectName: string;
+  description: string;
+  documentUrl?: string;
+  year: string;
+  quarter: string;
+  createdAt: string;
+  createdByName?: string;
+};
+
+export type CreateFundReportPayload = {
+  fundId: string;
+  projectName: string;
+  description: string;
+  year: string;
+  quarter: string;
+  document: File; // For file upload
+  investorIds?: string[]; // New field
+};
+
+export type PaginatedFundReports = {
+  results: FundReport[];
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
+};
+
+export const useGetFundReports = ({
+  fundId,
+  page = 1,
+  limit = 10,
+  year,
+  quarter,
+}: {
+  fundId: string;
+  page?: number;
+  limit?: number;
+  year?: string;
+  quarter?: string;
+}) => {
+  return useQuery<PaginatedFundReports, Error>({
+    queryKey: ["fundReports", fundId, page, limit, year, quarter], // Include year and quarter in queryKey
+    queryFn: async () => {
+      const params = { page, limit, year, quarter };
+      return mockGetFundReports(fundId, page, limit, year, quarter);
+    },
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
+};
+
+// Hook to create a new fund report
+export const useCreateFundReport = (userId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation<FundReport, Error, CreateFundReportPayload>({
+    mutationFn: async (payload) => {
+      const formData = new FormData();
+      formData.append("fundId", payload.fundId);
+      formData.append("projectName", payload.projectName);
+      formData.append("description", payload.description);
+      formData.append("year", payload.year);
+      formData.append("quarter", payload.quarter);
+      formData.append("document", payload.document);
+      if (payload.investorIds?.length) {
+        formData.append("investorIds", JSON.stringify(payload.investorIds));
+      }
+
+      return mockCreateFundReport(payload);
+    },
+    onSuccess: (data) => {
+      toast.success("Fund report created successfully");
+      queryClient.invalidateQueries({ queryKey: ["fundReports", data.fundId] });
+      if (userId) {
+        queryClient.invalidateQueries({
+          queryKey: ["unreadNotifications", userId],
+        });
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to create fund report");
+    },
+  });
+};

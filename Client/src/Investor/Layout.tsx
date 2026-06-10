@@ -1,0 +1,155 @@
+// 1. FIXED InvestorLayout.tsx - Apply theme styles properly
+import { useState, useRef, useEffect } from "react";
+import { Outlet } from "react-router-dom";
+import { BsBellFill } from "react-icons/bs";
+import { FaCaretDown } from "react-icons/fa";
+import { Bell, CircleDollarSign, Files, FileText, LayoutGrid, Receipt } from "lucide-react";
+import { useAuth } from "../Context/AuthContext";
+import ManagerSidebar from "../FundManager/Public/ManagerSidebar";
+import { useThemeContext } from "../Context/InvestorThemeContext";
+import { useGetUnreadCount } from "../API/Endpoints/Notification/notification";
+import UserDropdown from "../Components/UserDropDown";
+
+const InvestorLayout = () => {
+  const { user, logout } = useAuth();
+  const { currentTheme, isLoadingCurrentTheme } = useThemeContext();
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { data, isPending } = useGetUnreadCount(user?.id);
+  const unreadCount = data?.unreadCount || 0;
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        e.target &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    logout(setIsLoggingOut);
+  };
+
+  const menuItems = [
+    {
+      id: "dashboard",
+      icon: <LayoutGrid size={22} />,
+      label: "Dashboard",
+      path: "/investor/dashboard",
+    },
+    {
+      id: "funds",
+      icon: <CircleDollarSign size={22} />,
+      label: "Funds and Reporting",
+      path: "/investor/dashboard/funds",
+    },
+    {
+      id: "tax",
+      icon: <Receipt size={22} />,
+      label: "Tax Reports",
+      path: "/investor/dashboard/tax",
+    },
+    {
+      id: "documents",
+      icon: <FileText size={22} />,
+      label: "AML/KYC Documents",
+      path: "/investor/dashboard/documents",
+    },
+    {
+      id: "Subscription_Documents",
+      icon: <Files size={22} />,
+      label: "Subscription Documents",
+      path: "/investor/dashboard/subscription-documents",
+    },
+    {
+      id: "notifications",
+      icon: (
+        <div className={`relative ${isPending ? 'opacity-70 blur-[1px]' : ''}`}>
+          <Bell size={22} />
+          {!isPending && unreadCount > 0 && (
+            <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-semibold px-1.5 py-0.5 rounded-full">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          )}
+        </div>
+      ),
+      label: "Notifications",
+      path: "/investor/dashboard/notifications",
+    },
+  ];
+
+  // Show loading state while theme is loading
+  if (isLoadingCurrentTheme) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <span className="ml-3">Loading theme...</span>
+      </div>
+    );
+  }
+
+  // Default fallback colors if no theme is applied
+  const themeStyles = {
+    dashboardBg: currentTheme?.dashboardBackground,
+    cardBg: currentTheme?.cardBackground || "#ffffff",
+    primaryText: currentTheme?.primaryText || "#111827",
+    secondaryText: currentTheme?.secondaryText || "#6b7280",
+    sidebarAccent: currentTheme?.sidebarAccentText || "#3b82f6",
+  };
+
+  return (
+    <div
+      className="min-h-screen px-7 py-12 flex gap-9 transition-colors duration-300"
+      style={{
+        backgroundColor: currentTheme?.dashboardBackground,
+      }}
+    >
+      <div className="flex-shrink-0">
+        <ManagerSidebar menuItems={menuItems} userRole="investor" />
+      </div>
+      <div
+        className="flex-1 min-w-0 h-[calc(100vh-96px)] rounded-[40px] flex flex-col overflow-hidden"
+        style={{ backgroundColor: themeStyles.cardBg }}
+      >
+        <header className="w-full flex justify-between items-center py-7 px-9 relative">
+          <h3
+            className="text-xl font-semibold transition-colors duration-300"
+            style={{ color: themeStyles.primaryText }}
+          >
+            Investor Dashboard
+          </h3>
+
+          <div className="flex items-center gap-4">
+
+            {/* Replace entire dropdown section with: */}
+            <UserDropdown
+              user={user}
+              onLogout={handleLogout}
+              currentTheme={{
+                primaryText: themeStyles.primaryText,
+                secondaryText: themeStyles.secondaryText,
+                sidebarAccentText: themeStyles.sidebarAccent,
+                cardBackground: themeStyles.cardBg,
+              }}
+            />
+          </div>
+        </header>
+
+        {/* Outlet with theme context */}
+        <div className="flex-1 min-w-0 overflow-hidden px-9 pb-9">
+          <div className="w-full h-full max-w-full min-w-0 overflow-auto">
+            <Outlet />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default InvestorLayout;

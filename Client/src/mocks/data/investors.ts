@@ -1,0 +1,126 @@
+export const seedManagerInvestors = () => [
+  {
+    id: "inv-001",
+    name: "James Whitfield",
+    email: "investor@demo.platform",
+    onboardingStatus: "approved" as const,
+    status: "approved" as const,
+    createdAt: "2024-03-01T10:00:00.000Z",
+    lastLoginAt: "2025-06-08T14:30:00.000Z",
+    investmentAmount: 2500000,
+    joinDate: "2024-04-01",
+    kycStatus: "approved",
+  },
+  {
+    id: "inv-002",
+    name: "Elena Rodriguez",
+    email: "elena.rodriguez@demo.platform",
+    onboardingStatus: "approved" as const,
+    status: "approved" as const,
+    createdAt: "2024-03-10T10:00:00.000Z",
+    lastLoginAt: "2025-06-07T09:15:00.000Z",
+    investmentAmount: 1500000,
+    joinDate: "2024-04-15",
+    kycStatus: "approved",
+  },
+  {
+    id: "inv-003",
+    name: "Michael O'Brien",
+    email: "michael.obrien@demo.platform",
+    onboardingStatus: "approved" as const,
+    status: "approved" as const,
+    createdAt: "2024-03-20T10:00:00.000Z",
+    lastLoginAt: "2025-06-05T16:45:00.000Z",
+    investmentAmount: 3000000,
+    joinDate: "2024-05-01",
+    kycStatus: "approved",
+  },
+  {
+    id: "inv-004",
+    name: "Priya Sharma",
+    email: "priya.sharma@demo.platform",
+    onboardingStatus: "pending" as const,
+    status: "pending" as const,
+    createdAt: "2024-04-05T10:00:00.000Z",
+    lastLoginAt: "2025-05-28T11:00:00.000Z",
+    investmentAmount: 1000000,
+    joinDate: "2024-05-20",
+    kycStatus: "under_review",
+  },
+  {
+    id: "inv-005",
+    name: "David Kim",
+    email: "david.kim@demo.platform",
+    onboardingStatus: "rejected" as const,
+    status: "rejected" as const,
+    createdAt: "2024-04-12T10:00:00.000Z",
+    lastLoginAt: "2025-05-15T08:30:00.000Z",
+    investmentAmount: 500000,
+    joinDate: "2024-05-01",
+    kycStatus: "reupload_requested",
+  },
+  {
+    id: "inv-006",
+    name: "Amara Okonkwo",
+    email: "amara.okonkwo@demo.platform",
+    onboardingStatus: "approved" as const,
+    status: "approved" as const,
+    createdAt: "2024-05-01T10:00:00.000Z",
+    lastLoginAt: "2025-06-09T10:00:00.000Z",
+    investmentAmount: 2000000,
+    joinDate: "2024-06-01",
+    kycStatus: "approved",
+  },
+];
+
+export const seedAdminFundManagers = () => [
+  {
+    id: "fm-001",
+    name: "Sarah Chen",
+    email: "manager@acmecapital.demo",
+    created_at: "2023-11-01T10:00:00.000Z",
+    projectCount: 4,
+    investorCount: 6,
+    subdomain: "acme-capital",
+  },
+  {
+    id: "fm-002",
+    name: "Robert Hayes",
+    email: "manager@northstar.demo",
+    created_at: "2024-01-15T10:00:00.000Z",
+    projectCount: 2,
+    investorCount: 8,
+    subdomain: "northstar",
+  },
+  {
+    id: "fm-003",
+    name: "Lisa Nakamura",
+    email: "manager@horizon.demo",
+    created_at: "2024-06-20T10:00:00.000Z",
+    projectCount: 1,
+    investorCount: 3,
+    subdomain: "horizon-ventures",
+  },
+];
+
+export const seedAdminInvestors = () =>
+  seedManagerInvestors().map((inv) => ({
+    id: inv.id,
+    name: inv.name,
+    email: inv.email,
+    created_at: inv.createdAt,
+    projectCount: 2,
+    investorCount: 0,
+    subdomain: "acme-capital",
+  }));
+
+export const seedFundInvestorDropdown = () =>
+  seedManagerInvestors()
+    .filter((i) => i.status === "approved")
+    .map((inv) => ({
+      id: inv.id,
+      email: inv.email,
+      name: inv.name,
+      role: "investor",
+      isEmailVerified: true,
+    }));

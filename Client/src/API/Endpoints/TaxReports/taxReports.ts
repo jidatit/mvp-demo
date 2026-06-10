@@ -1,0 +1,175 @@
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import {
+  mockGetTaxReports,
+  mockCreateTaxReport,
+  mockUpdateTaxReport,
+  mockDeleteTaxReport,
+  mockDownloadTaxReport,
+} from "../../../mocks/handlers/taxReports";
+
+// ---------- API Types ----------
+export interface ApiResponse<T = any> {
+  success: boolean;
+  message: string;
+  data?: T;
+  error?: any;
+}
+
+export interface TaxReport {
+  id: string;
+  projectName: string;
+  reportURL: string;
+  createdBy: string;
+  year: string;
+  quarter: "Quarter1" | "Quarter2" | "Quarter3" | "Quarter4";
+  createdAt: string;
+  updatedAt: string;
+  investors: { id: string; name: string }[];
+}
+
+export interface PaginatedTaxReportResponse {
+  data: TaxReport[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export type TaxReportsApiResponse = ApiResponse<PaginatedTaxReportResponse>;
+
+export interface CreateTaxReportPayload {
+  projectName: string;
+  year: string;
+  quarter: "Quarter1" | "Quarter2" | "Quarter3" | "Quarter4";
+  document: File;
+  investorIds?: string[] | "all";
+}
+
+export interface UpdateTaxReportPayload {
+  projectName?: string;
+  year?: string;
+  quarter?: "Quarter1" | "Quarter2" | "Quarter3" | "Quarter4";
+  document?: File;
+  investorIds?: string[] | "all";
+}
+
+// ---------- API Hooks ----------
+
+// Paginated Tax Reports List
+interface UseTaxReportsParams {
+  page?: number;
+  limit?: number;
+  year?: string;
+  quarter?: string;
+}
+
+export const useTaxReports = (params: UseTaxReportsParams = {}) =>
+  useQuery<TaxReportsApiResponse, Error>({
+    queryKey: [
+      "tax-reports",
+      params.page ?? 1,
+      params.limit ?? 10,
+      params.year ?? null,
+      params.quarter ?? null,
+    ],
+    queryFn: async () => {
+      // Map quarter values from Q1-Q4 to Quarter1-Quarter4 if needed
+      const mappedParams = {
+        ...params,
+        quarter: params.quarter
+          ? params.quarter.startsWith("Quarter")
+            ? params.quarter
+            : `Quarter${params.quarter.replace("Q", "")}`
+          : undefined,
+      };
+      return mockGetTaxReports(mappedParams);
+    },
+    placeholderData: keepPreviousData,
+    staleTime: 60 * 1000,
+  });
+
+// Create Tax Report
+export const useCreateTaxReport = () => {
+  const queryClient = useQueryClient();
+  return useMutation<ApiResponse<TaxReport>, Error, CreateTaxReportPayload>({
+    mutationFn: async (payload) => {
+      const formData = new FormData();
+      formData.append("projectName", payload.projectName);
+      formData.append("year", payload.year);
+      formData.append("quarter", payload.quarter);
+      formData.append("document", payload.document);
+      if (payload.investorIds) {
+        formData.append("investorIds", JSON.stringify(payload.investorIds));
+      }
+
+      return mockCreateTaxReport(payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tax-reports"] });
+    },
+  });
+};
+
+// Update Tax Report
+export const useUpdateTaxReport = () => {
+  const queryClient = useQueryClient();
+  return useMutation<
+    ApiResponse<TaxReport>,
+    Error,
+    { id: string; data: UpdateTaxReportPayload }
+  >({
+    mutationFn: async ({ id, data }) => {
+      const formData = new FormData();
+      if (data.projectName) formData.append("projectName", data.projectName);
+      if (data.year) formData.append("year", data.year);
+      if (data.quarter) formData.append("quarter", data.quarter);
+      if (data.document) formData.append("document", data.document);
+      if (data.investorIds) {
+        formData.append("investorIds", JSON.stringify(data.investorIds));
+      }
+
+      return mockUpdateTaxReport(id, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tax-reports"] });
+    },
+  });
+};
+
+// Delete Tax Report
+export const useDeleteTaxReport = () => {
+  const queryClient = useQueryClient();
+  return useMutation<ApiResponse, Error, string>({
+    mutationFn: async (id) => {
+      return mockDeleteTaxReport(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tax-reports"] });
+    },
+  });
+};
+
+// Download Tax Report
+export const useDownloadTaxReport = () => {
+  return useMutation<string, Error, string>({
+    mutationFn: async (id) => {
+      const res = await mockDownloadTaxReport(id);
+      const { url } = res.data;
+      return url;
+    },
+    onSuccess: (url) => {
+      // Trigger file download in browser
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", ""); // filename comes from S3 Content-Disposition
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    },
+  });
+};
