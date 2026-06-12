@@ -38,7 +38,7 @@ export const seedDashboardAssets = () => ({
   id: "assets-001",
   userId: "fm-001",
   logoUrl: "/assets/logo.png",
-  projectName: "Acme Capital Partners",
+  projectName: "InvestorHub",
   projectDescription:
     "Institutional-grade private markets platform for accredited investors.",
   createdAt: "2024-01-01T10:00:00.000Z",

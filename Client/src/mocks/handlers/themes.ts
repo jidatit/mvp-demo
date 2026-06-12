@@ -36,7 +36,7 @@ export async function mockGetDashboardAssets() {
     success: true,
     data: get(STORAGE_KEYS.DASHBOARD_ASSETS, {
       logoUrl: "/assets/logo.png",
-      projectName: "Acme Capital Partners",
+      projectName: "InvestorHub",
       projectDescription: "Demo fund management platform",
     }),
   };

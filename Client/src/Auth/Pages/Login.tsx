@@ -150,13 +150,13 @@ const Login = () => {
 
       <div className="absolute top-14 short:static short:mb-2">
         {logoimg ? (
-          <img src={logoimg} alt="Logo" className="h-16 w-auto" />
+          <img src={logoimg} alt="InvestorHub" className="h-16 w-auto" />
         ) : (
           <p
-            className="text-white text-3xl"
+            className="text-white text-3xl font-semibold"
             style={{ color: currentTheme.sidebarAccentText }}
           >
-            Logo
+            InvestorHub
           </p>
         )}
       </div>
