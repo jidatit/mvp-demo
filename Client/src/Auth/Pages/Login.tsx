@@ -86,8 +86,10 @@ const Login = () => {
       { email, password },
       {
         onSuccess: (response) => {
-          if (response.success) {
-            if (response.data.user && !response.data.user.isEmailVerified) {
+          if (response.success && response.data) {
+            const { user, token } = response.data;
+
+            if (!user.isEmailVerified) {
               toast.error(
                 "Email not verified. Please verify your email first."
               );
@@ -96,12 +98,9 @@ const Login = () => {
             }
 
             toast.success("Signed in successfully!");
-            login({
-              user: response.data.user,
-              token: response.data.token,
-            });
+            login({ user, token });
 
-            const role = response.data.user.role;
+            const role = user.role;
             if (role === "admin") navigate("/admin/dashboard");
             else if (role === "fundManager") navigate("/fundmanager/dashboard");
             else if (role === "investor") navigate("/investor/dashboard");
