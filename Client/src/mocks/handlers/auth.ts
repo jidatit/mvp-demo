@@ -4,6 +4,7 @@ import {
   getUserByEmail,
   getUserById,
 } from "../data/users";
+import { get, set, STORAGE_KEYS } from "../storage";
 import { getCurrentUserId, mockDelay } from "../utils";
 
 export async function mockLogin(data: { email: string; password: string }) {
@@ -64,6 +65,17 @@ export function loginAsRole(role: "admin" | "fundManager" | "investor") {
     investor: MOCK_USERS.investor,
   };
   const user = userMap[role];
+  return {
+    user,
+    token: createMockToken(user.id, user.role),
+  };
+}
+
+export function loginAsInvestorOnboarding() {
+  const user = MOCK_USERS.investorOnboarding;
+  const onboarding = get<Record<string, unknown>>(STORAGE_KEYS.ONBOARDING, {});
+  delete onboarding[user.id];
+  set(STORAGE_KEYS.ONBOARDING, onboarding);
   return {
     user,
     token: createMockToken(user.id, user.role),

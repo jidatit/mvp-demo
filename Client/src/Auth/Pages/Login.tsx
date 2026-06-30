@@ -6,7 +6,7 @@ import { useAuth } from "../../Context/AuthContext";
 import { useLogin } from "../../API/Endpoints/Auth/AuthApis";
 import { useResendOtp } from "../../API/Endpoints/Otp/OtpResendApis";
 import { useTheme } from "../../Context/ThemeContext";
-import { loginAsRole } from "../../mocks";
+import { loginAsRole, loginAsInvestorOnboarding } from "../../mocks";
 
 type DemoRole = "admin" | "fundManager" | "investor";
 
@@ -130,6 +130,13 @@ const Login = () => {
     navigate(dashboard);
   };
 
+  const handleOnboardingDemoLogin = () => {
+    const { user, token } = loginAsInvestorOnboarding();
+    login({ user, token });
+    toast.success("Starting investor onboarding demo");
+    navigate("/investor/onboarding");
+  };
+
   return (
     <div className="bg-bgDark h-screen w-full flex items-center justify-center flex-col overflow-hidden">
       <div
@@ -174,13 +181,13 @@ const Login = () => {
           Sign in Your Account as
         </h3>
 
-        <div className="w-full mt-6 flex gap-2">
+        <div className="w-full mt-6 flex flex-wrap gap-2">
           {ROLE_CONFIG.map(({ role, label, dashboard }) => (
             <button
               key={role}
               type="button"
               onClick={() => handleDemoLogin(role, dashboard)}
-              className="flex-1 rounded-full h-9 text-sm font-medium transition-colors hover:opacity-90"
+              className="flex-1 min-w-[calc(33%-0.5rem)] rounded-full h-9 text-sm font-medium transition-colors hover:opacity-90"
               style={{
                 background: currentTheme.dashboardBackground,
                 color: currentTheme.primaryText,
@@ -189,6 +196,17 @@ const Login = () => {
               {label}
             </button>
           ))}
+          <button
+            type="button"
+            onClick={handleOnboardingDemoLogin}
+            className="w-full rounded-full h-9 text-sm font-medium transition-colors hover:opacity-90 border"
+            style={{
+              borderColor: currentTheme.dashboardBackground,
+              color: currentTheme.primaryText,
+            }}
+          >
+            Investor Onboarding
+          </button>
         </div>
 
         <div className="w-full mt-5 mb-1 flex items-center gap-3">

@@ -51,6 +51,21 @@ export const MOCK_USERS = {
       documentStatus: "approved",
     },
   } satisfies User,
+
+  investorOnboarding: {
+    id: "inv-onboarding",
+    name: "New Investor",
+    email: "onboarding@demo.platform",
+    role: "investor",
+    isEmailVerified: true,
+    isActive: true,
+    metadata: { fundManagerId: "fm-001" },
+    selectedTheme: "theme-001",
+    createdAt: now,
+    updatedAt: now,
+    isOnboarded: false,
+    onboardingStatus: null,
+  } satisfies User,
 };
 
 export function createMockToken(userId: string, role: string): string {
