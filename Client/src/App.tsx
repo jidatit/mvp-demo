@@ -3,7 +3,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { clearAllDemoKeys, reseedAll } from "./mocks";
 import { Toaster } from "react-hot-toast";
-import Login from "./Auth/Pages/Login";
+// Demo: the email/password Login page is kept but no longer routed.
+// import Login from "./Auth/Pages/Login";
+import RolePicker from "./Auth/Pages/RolePicker";
 import Signup from "./Auth/Pages/Signup";
 import EmailVerification from "./Auth/Pages/EmailVerification";
 import ForgotPassword from "./Auth/Pages/ForgotPassword";
@@ -81,7 +83,8 @@ function App() {
       <Routes>
         {/* Public routes - accessible when not logged in */}
         <Route element={<PublicRoute />}>
-          <Route path="/login" element={<Login />} />
+          {/* <Route path="/login" element={<Login />} /> */}
+          <Route path="/login" element={<RolePicker />} />
           <Route path="/login-as/:id" element={<LoginAsPage />} />
 
           <Route path="/signup/:fundManagerId?" element={<Signup />} />
